@@ -11,10 +11,10 @@ Simply clone this repo and use as described in Jacek Shae's Tailwind JIT example
 
 That is based on this. Open two terminal and execute two commands: tailwind and shadow-cljs dev
 
-npm run postcss:watch
+```npm run postcss:watch```
 
-npm run dev
+```npm run dev```
 
 Add Framer Motion to your project:
 
- yarn add framer-motion
+```yarn add framer-motion```
