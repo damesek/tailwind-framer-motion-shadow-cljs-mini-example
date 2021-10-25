@@ -7,10 +7,11 @@
 
 (def log (.-log js/console))
 
-(defn tailwind-menu 
+
+(defn tailwind-menu
   "ofc you can put here any ui element"
   []
-  [:div.absolute.z-20.transform.mt-5.px-4.w-screen.max-w-xs.sm:px-0 {:class "left-1/2 -translate-x-1/2"}
+  [:div.absolute.z-20.transform.pt-5.px-4.w-screen.max-w-xs.sm:px-0.mt-0 {:class "left-1/2 -translate-x-1/2"}
    [:div.rounded-lg.shadow-lg.ring-1.ring-black.ring-opacity-5.overflow-hidden
     [:div.relative.grid.gap-6.bg-white.px-5.py-6
      [:a.-m-4.p-4.block.rounded-md.hover:bg-gray-50.transition.ease-in-out.duration-150 {:href "#"}
@@ -27,35 +28,56 @@
   "see in documentation
    https://www.framer.com/docs/animation/"
   {:class      "rounded-lg ml-10"
-   :initial     #js {:opacity 0}
-   :animate     #js {:opacity 1 :y 15}
-   :exit        #js {:opacity 0 :y 0}
-   :transition (clj->js {:duration 1  :ease "easeOut"})})
+   :initial    #js {:opacity 0}
+   :animate    #js {:opacity 1 :y 15}
+   :exit       #js {:opacity 0 :y 0}
+   :transition (clj->js {:duration 1 :ease "easeOut"})})
 
-(defn content-to-show
-  "just4demo takes multiple parameters with default values"
-  ([]
-   (content-to-show tailwind-menu))
-  ([what-we-show]
-   (content-to-show what-we-show framer-motion-params))
-  ([what-we-show motion-params-map]
-   [:> (.-div motion) motion-params-map
-    [what-we-show]]))
 
-(defn example-menu 
+(defn example-menu
+  "create function components from Reagent components (functions)
+   https://github.com/reagent-project/reagent/blob/master/doc/ReactFeatures.md
+   [:f> example-menu framer-motion-params tailwind-menu]"
+  [params ui]
+  (let [[isOpen setIsOpen] (react/useState false)]
+    [:div {:on-click (fn [e]
+                       (.preventDefault e)
+                       (setIsOpen (not isOpen)))}
+     [:a.ml-8.mb-0.whitespace-nowrap.inline-flex.items-center.justify-center.px-4.py-2.border.border-transparent.rounded-md.shadow-sm.text-base.font-medium.text-white.bg-blue-gray-400.hover:bg-blue-gray-600
+      {:href "#"} "menu demo"]
+     [:> AnimatePresence
+      (when isOpen
+        [:> (.-div motion)
+         (merge params {:on-mouse-leave #(setIsOpen false)})
+         [ui]])]]))
+
+
+#_(defn example-menu
   "create function components from Reagent components (functions)
    https://github.com/reagent-project/reagent/blob/master/doc/ReactFeatures.md"
   []
   (let [[isOpen setIsOpen] (react/useState false)]
-    [:div {:on-click (fn [e]
-                       (.preventDefault e)
-                       (setIsOpen (not isOpen))
-                       (log "isOpen " isOpen))}
-     [:a.ml-8.whitespace-nowrap.inline-flex.items-center.justify-center.px-4.py-2.border.border-transparent.rounded-md.shadow-sm.text-base.font-medium.text-white.bg-blue-gray-400.hover:bg-blue-gray-600 {:href "#"} "menu demo"]
+    [:div     {:on-click (fn [e]
+                       ;(.preventDefault e)
+                           (setIsOpen (not isOpen))
+                           (reset! menu-state true)
+                           (log "isOpen " isOpen))}
+     [:a.ml-8.mb-0.whitespace-nowrap.inline-flex.items-center.justify-center.px-4.py-2.border.border-transparent.rounded-md.shadow-sm.text-base.font-medium.text-white.bg-blue-gray-400.hover:bg-blue-gray-600
+      {:href "#"} "menu demo"]
+       [:> AnimatePresence
+        (when isOpen 
+          [:> (.-div motion)
+           {:class      "rounded-lg ml-10"
+            :on-mouse-leave (fn [e]
+                              (reset! menu-state false)
+                              (setIsOpen false))
+            :initial     #js {:opacity 0}
+            :animate     #js {:opacity 1 :y 15}
+            :exit        #js {:opacity 0 :y 0}
+            :transition (clj->js {:duration 1  :ease "easeOut"})}
+            [tailwind-menu]])]]))
 
-     [:> AnimatePresence
-      (if isOpen
-        [content-to-show])]]))
+
 
 
 (defn public
@@ -144,6 +166,4 @@
           [:span {:class "truncate"} "Human Resources"]]]]]]]]
    [:div {:class "flex flex-col w-0 flex-1"}
      [:div.bg-gray-400.py-4.text-center
-      [:f> example-menu]]
-     
-      ]])
+      [:f> example-menu framer-motion-params tailwind-menu]]]])
